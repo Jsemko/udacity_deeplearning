@@ -97,6 +97,7 @@ with graph.as_default():
         tf.matmul(tf_test_dataset, weights) + biases
     )
 
+
 num_steps = 301
 
 
@@ -136,9 +137,9 @@ with tf.Session(graph=graph) as session:
 
 # Main Problem: Use above template to make 1 layer NN
 
-batch_size = 3001
+batch_size = 128
 
-beta = .05
+beta = .001
 
 HL_size = 512
 
@@ -202,7 +203,7 @@ with graph.as_default():
         ) + biases_2
     )
 
-num_steps = 3001
+num_steps = 10001
 
 with tf.Session(graph=graph) as session:
     tf.global_variables_initializer().run()
@@ -217,6 +218,8 @@ with tf.Session(graph=graph) as session:
         batch_data = train_dataset[offset:(offset + batch_size), :]
         batch_labels = train_labels[offset:(offset + batch_size), :]
 
+        if step % 10 == 0:
+            print(step)
         # Prepare a dictionary telling the session where to feed the minibatch.
         # The key of the dictionary is the placeholder node of the graph to be fed,
         # and the value is the numpy array to feed to it.
