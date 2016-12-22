@@ -141,7 +141,10 @@ batch_size = 128
 
 beta = .001
 
-HL_size = 512
+HL_size = 1024
+
+keep_prob_conn = 1
+keep_prob_neurons = .9
 
 graph = tf.Graph()
 with graph.as_default():
@@ -157,11 +160,13 @@ with graph.as_default():
     tf_valid_dataset = tf.constant(valid_dataset)
     tf_test_dataset = tf.constant(test_dataset)
 
+
     tf_beta = tf.constant(beta)
     # Variables.
     weights_1 = tf.Variable(
         tf.truncated_normal([image_size * image_size, HL_size])
     )
+
     biases_1 = tf.Variable(tf.zeros([HL_size]))
 
     weights_2 = tf.Variable(
@@ -171,9 +176,18 @@ with graph.as_default():
 
 
     # Training computation.
-    neurons = tf.nn.relu(tf.matmul(tf_train_dataset, weights_1) + biases_1)
+    neurons = tf.nn.relu(
+        tf.matmul(
+            tf.nn.dropout(tf_train_dataset, keep_prob_neurons),
+            tf.nn.dropout(weights_1, keep_prob_conn)
+        ) + biases_1
+    )
 
-    logits = tf.matmul(neurons, weights_2) + biases_2
+    logits = tf.matmul(
+        tf.nn.dropout(neurons, keep_prob_neurons),
+        tf.nn.dropout(weights_2, keep_prob_conn)
+    ) + biases_2
+
     loss = tf.reduce_mean(
         tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels)+
         tf.mul(
@@ -182,7 +196,11 @@ with graph.as_default():
     )
 
     # Optimizer.
-    optimizer = tf.train.GradientDescentOptimizer(0.5).minimize(loss)
+    global_step = tf.Variable(0)  # count the number of steps taken.
+    learning_rate = tf.train.exponential_decay(0.5, global_step, 500, .95)
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(
+        loss, global_step=global_step
+    )
 
     # Predictions for the training, validation, and test data.
     train_prediction = tf.nn.softmax(logits)
@@ -194,6 +212,7 @@ with graph.as_default():
             weights_2
         ) + biases_2
     )
+
     test_prediction = tf.nn.softmax(
          tf.matmul(
             tf.nn.relu(
@@ -203,7 +222,10 @@ with graph.as_default():
         ) + biases_2
     )
 
-num_steps = 10001
+num_steps = 15001
+
+#for "overfitting" case, set
+#num_steps = 30
 
 with tf.Session(graph=graph) as session:
     tf.global_variables_initializer().run()
