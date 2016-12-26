@@ -7,7 +7,7 @@ from six.moves import cPickle as pickle
 
 import os
 
-data_dir = '/media/jeremy/San/Data/udacity_data/deeplearning'
+data_dir = '/home/jsemko/data/udacity'
 
 pickle_file = 'notMNIST.pickle'
 pickle_file = os.path.join(data_dir, pickle_file)
@@ -49,11 +49,13 @@ print('Validation set', valid_dataset.shape, valid_labels.shape)
 print('Test set', test_dataset.shape, test_labels.shape)
 
 
-def accuracy(predictions, labels):
-    return (100.0 * np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1))
-          / predictions.shape[0])
-
-
+def accuracy(predictions, labels, return_wrong=False):
+    correct = np.argmax(predictions, 1) == np.argmax(labels, 1)
+    acc=  (100.0 * np.sum(correct)) / predictions.shape[0]
+    if return_wrong:
+        return acc, ~correct
+    else:
+        return acc
 # Logistic model, now with L2 loss
 batch_size = 128
 beta = .02
@@ -98,7 +100,7 @@ with graph.as_default():
     )
 
 
-num_steps = 301
+num_steps = 101
 
 
 
@@ -122,6 +124,9 @@ with tf.Session(graph=graph) as session:
             tf_train_dataset : batch_data,
             tf_train_labels : batch_labels
         }
+        #l, predictions = session.run(
+        #    [loss, train_prediction], feed_dict=feed_dict
+        #)
         _, l, predictions = session.run(
             [optimizer, loss, train_prediction], feed_dict=feed_dict
         )
@@ -227,6 +232,9 @@ num_steps = 15001
 #for "overfitting" case, set
 #num_steps = 30
 
+#plot bad examples?
+plot_incorrect = False
+
 with tf.Session(graph=graph) as session:
     tf.global_variables_initializer().run()
     print("Initialized")
@@ -240,7 +248,7 @@ with tf.Session(graph=graph) as session:
         batch_data = train_dataset[offset:(offset + batch_size), :]
         batch_labels = train_labels[offset:(offset + batch_size), :]
 
-        if step % 10 == 0:
+        if step % 100 == 0:
             print(step)
         # Prepare a dictionary telling the session where to feed the minibatch.
         # The key of the dictionary is the placeholder node of the graph to be fed,
@@ -259,6 +267,18 @@ with tf.Session(graph=graph) as session:
             print("Validation accuracy: %.1f%%" % accuracy(
                 valid_prediction.eval(), valid_labels)
             )
-    print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
+    acc, incorrect = accuracy(
+        test_prediction.eval(),
+        test_labels,
+        return_wrong=True
+    )
+    print("Test accuracy: %.1f%%" % acc)
+
+    if plot_incorrect:
+        import matplotlib.pyplot as plt
+        bad_pics = test_dataset[incorrect,:].reshape((sum(incorrect),28,28))
+        for i in range(bad_pics.shape[0]):
+            plt.imshow(bad_pics[i,:,:], cmap='bone')
+            plt.show()
 
 
