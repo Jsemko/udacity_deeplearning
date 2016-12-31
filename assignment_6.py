@@ -93,7 +93,10 @@ class BatchGenerator(object):
 
     def _next_batch(self):
         """Generate a single batch from the current cursor position in the data."""
-        batch = np.zeros(shape=(self._batch_size, vocabulary_size), dtype=np.float)
+        batch = np.zeros(
+            shape=(self._batch_size, vocabulary_size),
+            dtype=np.float
+        )
         for b in range(self._batch_size):
             batch[b, char2id(self._text[self._cursor[b]])] = 1.0
             self._cursor[b] = (self._cursor[b] + 1) % self._text_size
