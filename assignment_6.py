@@ -14,7 +14,7 @@ from sklearn.manifold import TSNE
 
 url = 'http://mattmahoney.net/dc/'
 
-data_dir = '/home/jsemko/data/udacity'
+data_dir = '/media/jeremy/San/Data/udacity_data/deeplearning'#'/home/jsemko/data/udacity'
 
 def maybe_download(filename, expected_bytes):
     """Download a file if not present, and make sure it's the right size."""
@@ -46,8 +46,8 @@ def read_data(filename):
     return data
 
 text = read_data(filename)
-print('Data size %d' % len(text))
 
+print('Data size %d' % len(text))
 
 valid_size = 1000
 valid_text = text[:valid_size]
@@ -79,7 +79,7 @@ print(id2char(1), id2char(26), id2char(0))
 
 
 batch_size=64
-num_unrollings=10
+num_unrollings=20
 
 class BatchGenerator(object):
     def __init__(self, text, batch_size, num_unrollings):
@@ -103,9 +103,9 @@ class BatchGenerator(object):
         return batch
 
     def next(self):
-        """Generate the next array of batches from the data. The array consists of
-        the last batch of the previous array, followed by num_unrollings new ones.
-        """
+        """Generate the next array of batches from the data. The array consists
+        of the last batch of the previous array, followed by num_unrollings new
+        ones.  """
         batches = [self._last_batch]
         for step in range(self._num_unrollings):
             batches.append(self._next_batch())
