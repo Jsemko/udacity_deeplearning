@@ -86,7 +86,9 @@ def main():
         # cross-entropy across all training examples: that's our loss.
         logits = tf.matmul(tf_train_dataset, weights) + biases
         loss = tf.reduce_mean(
-            tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels)
+            tf.nn.softmax_cross_entropy_with_logits(
+                logits=logits,
+                labels=tf_train_labels)
         )
 
         # Optimizer.
@@ -165,7 +167,9 @@ def main():
         # Training computation.
         logits = tf.matmul(tf_train_dataset, weights) + biases
         loss = tf.reduce_mean(
-            tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels)
+            tf.nn.softmax_cross_entropy_with_logits(
+                logits=logits,
+                labels=tf_train_labels)
         )
 
         # Optimizer.
@@ -251,7 +255,10 @@ def main():
 
         logits = tf.matmul(neurons, weights_2) + biases_2
         loss = tf.reduce_mean(
-            tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels)
+            tf.nn.softmax_cross_entropy_with_logits(
+                logits=logits,
+                labels=tf_train_labels
+            )
         )
 
         # Optimizer.
