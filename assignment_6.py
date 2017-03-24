@@ -14,8 +14,8 @@ from sklearn.manifold import TSNE
 
 url = 'http://mattmahoney.net/dc/'
 
-data_dir = '/media/jeremy/San/Data/udacity_data/deeplearning'#'/home/jsemko/data/udacity'
-
+#data_dir = '/media/jeremy/San/Data/udacity_data/deeplearning'
+data_dir = '/home/jsemko/data/udacity'
 def maybe_download(filename, expected_bytes):
     """Download a file if not present, and make sure it's the right size."""
     basename = os.path.basename(filename)
@@ -232,10 +232,11 @@ with graph.as_default():
     with tf.control_dependencies([saved_output.assign(output),
                                   saved_state.assign(state)]):
         # Classifier.
-        logits = tf.nn.xw_plus_b(tf.concat_v2(outputs, 0), w, b)
+        logits = tf.nn.xw_plus_b(tf.concat(outputs, 0), w, b)
         loss = tf.reduce_mean(
             tf.nn.softmax_cross_entropy_with_logits(
-                logits, tf.concat_v2(train_labels, 0)
+                logits=logits,
+                labels=tf.concat(train_labels, 0)
             )
         )
 
